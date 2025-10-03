@@ -1,0 +1,507 @@
+<html>
+<head>
+    <title>Inputan Pemesanan Menu</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            border: 4px solid #e5933b;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .header {
+            background-color: #e5933b;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            border-radius: 10px 10px 0 0;
+            font-size: 20px;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .row:last-child {
+            border-bottom: none;
+        }
+        .row input[type="text"], .row input[type="number"] {
+            width: 140px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        .row .label {
+            flex: 1;
+            font-weight: bold;
+            color: #333;
+        }
+        .row .controls {
+            display: flex;
+            align-items: center;
+        }
+        .row .controls button {
+            width: 30px;
+            height: 30px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f5f5f5;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .row .controls button:hover {
+            background-color: #ddd;
+        }
+        .total, .tunai, .kupon, .nominal-kupon, .keterangan {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .total span, .tunai span, .kupon span, .nominal-kupon span, .keterangan span {
+            flex: 1;
+            font-weight: bold;
+            color: #333;
+        }
+        .total input, .tunai input, .kupon input, .nominal-kupon input, .keterangan input {
+            width: 120px;
+            text-align: right;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 6px;
+        }
+        .keterangan input {
+            border: none;
+            background-color: white;
+            color: red;
+            font-weight: bold;
+            width: 200px;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .button-container button {
+            background-color: #e5933b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .button-container button:hover {
+            background-color: #45a049;
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+            .header {
+                font-size: 18px;
+                padding: 10px;
+            }
+            .row input[type="text"], .row input[type="number"] {
+                width: 80px;
+                padding: 4px;
+            }
+            .row .controls button {
+                width: 25px;
+                height: 25px;
+                margin: 0 3px;
+            }
+            .keterangan input {
+                width: 160px;
+                padding: 6px;
+            }
+            }
+            .total input, .tunai input, .kupon input, .nominal-kupon input{
+                width: 100px;
+                padding: 6px;
+            }
+            .button-container button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function incrementValue(id) {
+            const input = document.getElementById(id);
+            input.value = parseInt(input.value) + 1;
+            calculateTotal();
+        }
+
+        function decrementValue(id) {
+            const input = document.getElementById(id);
+            if (parseInt(input.value) > 0) {
+                input.value = parseInt(input.value) - 1;
+                calculateTotal();
+            }
+        }
+
+        function calculateTotal() {
+            const prices = {
+                ricebowl: 15000,
+                jasuke: 5000,
+                sasetan: 5000,
+                mojito: 10000,
+                indomie: 5000,
+                tahu_bulat: 2000,
+                paket_a: 20000,
+                paket_b: 8000,
+                paket_c: 18000
+            };
+            let total = 0;
+            for (let key in prices) {
+                const input = document.getElementById(key);
+                total += input.value * prices[key];
+            }
+            document.getElementById('total-bayar').value = formatRupiah(total.toString(), 'Rp');
+            updateSasetanOptions();
+            calculateChange();
+            updateSasetanSelections(); 
+        }
+
+        function updateSasetanOptions() {
+          const sasetanCount = parseInt(document.getElementById('sasetan').value) || 0;
+          const paketBCount = parseInt(document.getElementById('paket_b').value) || 0;
+          const paketCCount = parseInt(document.getElementById('paket_c').value) || 0;
+          const totalCount = sasetanCount + paketBCount + paketCCount;
+          const sasetanOptions = [
+          'BUBBLEGUM', 'COKLAT', 'VANILLA BLUE', 'MANGGA', 'TARO', 'GOODAY', 'NUTRISARI', 'TEH PUCUK', 'AQUA MINERAL'
+          ];
+           const sasetanContainer = document.getElementById('sasetan-options');
+           const currentSelections = Array.from(sasetanContainer.querySelectorAll('select')).map(select => select.value);
+           sasetanContainer.innerHTML = '';
+             for (let i = 0; i < totalCount; i++) {
+             const selectContainer = document.createElement('div');
+             selectContainer.style.marginBottom = '5px';
+             const label = document.createElement('label');
+             label.textContent = `Sasetan ${i + 1}: `;
+             const select = document.createElement('select');
+             select.className = 'sasetan-select';
+             select.onchange = updateSasetanSelections;
+             sasetanOptions.forEach(option => {
+             const opt = document.createElement('option');
+             opt.value = option;
+             opt.text = option;
+             if (currentSelections[i] === option) {
+                opt.selected = true;
+             }
+             select.appendChild(opt);
+             });
+             selectContainer.appendChild(label);
+             selectContainer.appendChild(select);
+             sasetanContainer.appendChild(selectContainer);
+             }
+             updateSasetanSelections();
+      }
+
+
+        function formatRupiah(angka, prefix) {
+            var number_string = angka.replace(/[^,\d]/g, '').toString(),
+                split = number_string.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix == undefined ? rupiah : (rupiah ? 'Rp' + rupiah : '');
+        }
+
+        function calculateChange() {
+            const totalBayar = parseInt(document.getElementById('total-bayar').value.replace('Rp', '').replace(/\./g, '')) || 0;
+            const tunai = parseInt(document.getElementById('tunai').value.replace('Rp', '').replace(/\./g, '')) || 0;
+            const kupon = parseInt(document.getElementById('kupon').value) || 0;
+            const kuponValue = kupon * 5000;
+            document.getElementById('kupon-value').value = formatRupiah(kuponValue.toString(), 'Rp');
+            const totalPembayaran = tunai + kuponValue;
+            const selisih = totalPembayaran - totalBayar;
+            const keterangan = document.getElementById('keterangan');
+            if (selisih < 0) {
+                keterangan.value = 'Kurang Bayar: ' + formatRupiah(Math.abs(selisih).toString(), 'Rp');
+                keterangan.style.color = 'red';
+            } else {
+                keterangan.value = 'Kembalian: ' + formatRupiah(selisih.toString(), 'Rp');
+                keterangan.style.color = 'green';
+            }
+        }
+
+        function formatInput() {
+            const input = document.getElementById('tunai');
+
+            input.onkeydown = function(e) {
+                if (e.key === 'Backspace') {
+                    e.preventDefault(); 
+                    let value = input.value.replace(/[^\d]/g, ''); 
+                    value = value.slice(0, -4);
+            
+                    if (value === '') {
+                        input.value = '';
+                        calculateChange();
+                        return;
+                    }
+
+            value = value + '000';
+
+            let formattedValue = '';
+            let counter = 0;
+            
+            for (let i = value.length - 1; i >= 0; i--) {
+                if (counter === 3) {
+                    formattedValue = '.' + formattedValue;
+                    counter = 0;
+                }
+                formattedValue = value[i] + formattedValue;
+                counter++;
+            }
+            
+            input.value = 'Rp' + formattedValue;
+            calculateChange();
+
+            const cursorPos = input.value.length - 4;
+            input.setSelectionRange(cursorPos, cursorPos);
+            return;
+                }
+            };
+
+            let value = input.value.replace(/[^\d]/g, ''); 
+            if (value === '') {
+                input.value = '';
+                calculateChange();
+                return;
+            }
+
+            if (value.length < 4) {
+                value = value + '000';
+            } else {
+                value = value.slice(0, -3) + '000';
+            }
+
+            let formattedValue = '';
+            let counter = 0;
+    
+            for (let i = value.length - 1; i >= 0; i--) {
+                if (counter === 3) {
+                    formattedValue = '.' + formattedValue;
+                    counter = 0;
+                    }
+                    formattedValue = value[i] + formattedValue;
+                    counter++;
+                }
+
+            input.value = 'Rp' + formattedValue;
+            calculateChange();
+
+            const cursorPos = input.value.length - 4;
+            input.setSelectionRange(cursorPos, cursorPos);
+        }
+
+        function updateSasetanSelections() {
+            const selections = Array.from(document.querySelectorAll('.sasetan-select')).map(select => select.value);
+            document.getElementById('sasetan_selections').value = selections.join(', ');
+             console.log('Sasetan selections updated:', selections);
+             window.sasetanSelectionsArray = selections;
+        }
+
+        function getSelectedSasetanOptions() {
+            console.log('Sasetan options selected:', window.sasetanSelectionsArray);
+        }
+
+        function submitForm() {
+           var form = document.getElementById('orderForm');
+           var formData = new FormData(form);
+    
+           const sasetanSelections = window.sasetanSelectionsArray || [];
+           formData.append('sasetan_options', sasetanSelections.join(', '));  // Menambahkan pilihan sasetan ke form data
+    
+           console.log('Form data before sending:');
+            for (var pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+            }
+
+          fetch('https://script.google.com/macros/s/AKfycbxPWLOVkWdcRvJch4X08fvdo_Lf40R0cPY9eHiElvaxe0ZZT5zQrJP2HpXOFI9Uqhw5/exec', {
+          method: 'POST',
+          body: formData
+          })
+          .then(response => response.text())
+          .then(text => {
+          console.log('Response from server:', text);
+          alert
+          const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+          }
+          });
+          Toast.fire({
+          icon: "success",
+          title: "UDAH TERSIMPAN CUY"
+          });
+          resetForm(); 
+          })
+          .catch(error => {
+          console.error('Error!', error.message);
+          alert('Terjadi kesalahan: ' + error.message);
+           });
+            return false; 
+        }
+
+        function resetForm() {
+            document.querySelectorAll('.row input[type="number"]').forEach(input => input.value = 0);
+            document.querySelectorAll('.row input[type="text"]').forEach(input => input.value = '');
+            document.getElementById('total-bayar').value = 'Rp0';
+            document.getElementById('kupon-value').value = 'Rp0';
+            document.getElementById('tunai').value = '';
+            document.getElementById('kupon').value = 0;
+            document.getElementById('keterangan').value = '';
+            document.getElementById('sasetan-options').innerHTML = '';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">INPUTAN PEMESANAN MENU</div>
+        <form id="orderForm" onsubmit="return submitForm()">
+            <div class="row">
+                <div class="label">NAMA PEMBELI</div>
+                <input type="text" id="nama_pembeli" name="nama_pembeli" required>
+            </div>
+            <div class="row">
+                <div class="label">RICEBOWL</div>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('ricebowl')">-</button>
+                    <input type="number" id="ricebowl" name="ricebowl" value="0" min="0" oninput="calculateTotal()">
+                    <button type="button" onclick="incrementValue('ricebowl')">+</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="label">JASUKE</div>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('jasuke')">-</button>
+                    <input type="number" id="jasuke" name="jasuke" value="0" min="0" oninput="calculateTotal()">
+                    <button type="button" onclick="incrementValue('jasuke')">+</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="label">SASETAN</div>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('sasetan')">-</button>
+                    <input type="number" id="sasetan" name="sasetan" value="0" min="0" oninput="calculateTotal()">
+                    <button type="button" onclick="incrementValue('sasetan')">+</button>
+                </div>
+            </div>
+            <div class="row">
+                <div id="sasetan-options" style="flex: 1;"></div>
+            </div>
+            <div class="row">
+                <div class="label">MOJITO</div>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('mojito')">-</button>
+                    <input type="number" id="mojito" name="mojito" value="0" min="0" oninput="calculateTotal()">
+                    <button type="button" onclick="incrementValue('mojito')">+</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="label">INDOMIE</div>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('indomie')">-</button>
+                    <input type="number" id="indomie" name="indomie" value="0" min="0" oninput="calculateTotal()">
+                    <button type="button" onclick="incrementValue('indomie')">+</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="label">TAHU-SOTONG(/3pcs)</div>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('tahu_bulat')">-</button>
+                    <input type="number" id="tahu_bulat" name="tahu_bulat" value="0" min="0" oninput="calculateTotal()">
+                    <button type="button" onclick="incrementValue('tahu_bulat')">+</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="label">PAKET A RICEBOWL+MOJITO</div>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('paket_a')">-</button>
+                    <input type="number" id="paket_a" name="paket_a" value="0" min="0" oninput="calculateTotal()">
+                    <button type="button" onclick="incrementValue('paket_a')">+</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="label">PAKET B SASETAN+INDOMIE</div>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('paket_b')">-</button>
+                    <input type="number" id="paket_b" name="paket_b" value="0" min="0" oninput="calculateTotal()">
+                    <button type="button" onclick="incrementValue('paket_b')">+</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="label">PAKET C RICEBOWL+SASETAN</div>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('paket_c')">-</button>
+        	    <input type="number" id="paket_c" name="paket_c" value="0" min="0" oninput="calculateTotal()">
+        	    <button type="button" onclick="incrementValue('paket_c')">+</button>
+                </div>
+            </div>
+
+            <div class="total">
+                <span>TOTAL BAYAR</span>
+                <input type="text" id="total-bayar" name="total_bayar" value="Rp0" readonly>
+            </div>
+            <div class="tunai">
+                <span>TUNAI</span>
+                <input type="text" id="tunai" name="tunai" oninput="formatInput()">
+            </div>
+            <div class="kupon">
+                <span>KUPON</span>
+                <div class="controls">
+                    <button type="button" onclick="decrementValue('kupon')">-</button>
+                    <input type="number" id="kupon" name="kupon" value="0" min="0" oninput="calculateChange()">
+                    <button type="button" onclick="incrementValue('kupon')">+</button>
+                </div>
+            </div>
+            <div class="nominal-kupon">
+                <span>NOMINAL KUPON</span>
+                <input type="text" id="kupon-value" value="Rp0" readonly>
+            </div>
+            <div class="keterangan">
+                <span>KETERANGAN</span>
+                <input type="text" id="keterangan" name="keterangan" readonly>
+            </div>
+            <div class="button-container">
+                <button type="submit">SIMPAN</button>
+            </div>
+            <input type="hidden" id="sasetan_selections" name="sasetan_selections">
+    </form>
+    </div>
+</body>
+</html>
